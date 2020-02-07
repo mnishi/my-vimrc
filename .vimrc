@@ -129,7 +129,7 @@ autocmd FileType ruby setl tabstop=2 expandtab shiftwidth=2
 "------------------------
 " search 
 "------------------------
-nnoremap <silent> gu /<C-R><C-W><CR>
+nnoremap <silent> gt /<C-R><C-W><CR>
 
 "------------------------
 " filer 
