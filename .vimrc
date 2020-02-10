@@ -12,23 +12,23 @@ filetype off
 filetype plugin indent off
 
 "---------------------------
-" NeoBundle
+" dein
 "---------------------------
-set runtimepath+=~/.vim/bundle/neobundle.vim/
-let g:neobundle#log_filename = $HOME . "/.vim/bundle/.neobundle.log"
-call neobundle#begin(expand('~/.vim/bundle/'))
-NeoBundleFetch 'Shougo/neobundle.vim'
+if &compatible
+    set nocompatible
+endif
+set runtimepath+=~/.vim/dein/repos/github.com/Shougo/dein.vim
+call dein#begin('~/.vim/dein')
 
-NeoBundle 'grep.vim'
-NeoBundle 'Shougo/neocomplete'
-NeoBundle 'Shougo/unite.vim'
-NeoBundle 'Shougo/neomru.vim'
-NeoBundle 'tomasr/molokai'
-NeoBundle 'majutsushi/tagbar'
-NeoBundle 'thinca/vim-qfreplace'
+call dein#add('vim-scripts/grep.vim')
+call dein#add('Shougo/neocomplete')
+call dein#add('Shougo/unite.vim')
+call dein#add('Shougo/neomru.vim')
+call dein#add('tomasr/molokai')
+call dein#add('majutsushi/tagbar')
+call dein#add('thinca/vim-qfreplace')
 
-call neobundle#end()
-NeoBundleCheck
+call dein#end()
 
 "---------------------
 " view
