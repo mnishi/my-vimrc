@@ -18,8 +18,7 @@ if &compatible
     set nocompatible
 endif
 set runtimepath+=~/.vim/dein/repos/github.com/Shougo/dein.vim
-call dein#begin('~/.vim/dein')
-
+call dein#begin(expand('~/.vim/dein'))
 call dein#add('vim-scripts/grep.vim')
 call dein#add('Shougo/neocomplete')
 call dein#add('Shougo/unite.vim')
@@ -129,7 +128,7 @@ autocmd FileType ruby setl tabstop=2 expandtab shiftwidth=2
 "------------------------
 " search 
 "------------------------
-nnoremap <silent> gu /<C-R><C-W><CR>
+nnoremap <silent> gt /<C-R><C-W><CR>
 
 "------------------------
 " filer 
