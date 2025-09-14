@@ -17,17 +17,22 @@ filetype plugin indent off
 if &compatible
     set nocompatible
 endif
-set runtimepath+=~/.vim/dein/repos/github.com/Shougo/dein.vim
-call dein#begin(expand('~/.vim/dein'))
-call dein#add('vim-scripts/grep.vim')
-call dein#add('Shougo/neocomplete')
-call dein#add('Shougo/unite.vim')
-call dein#add('Shougo/neomru.vim')
-call dein#add('tomasr/molokai')
-call dein#add('majutsushi/tagbar')
-call dein#add('thinca/vim-qfreplace')
 
-call dein#end()
+call plug#begin()
+Plug 'vim-scripts/grep.vim'
+Plug 'Shougo/unite.vim'
+Plug 'Shougo/neomru.vim'
+Plug 'tomasr/molokai'
+Plug 'preservim/tagbar'
+Plug 'thinca/vim-qfreplace'
+Plug 'vim-denops/denops.vim'
+Plug 'Shougo/ddc.vim'
+Plug 'Shougo/ddc-around'
+Plug 'Shougo/ddc-matcher_head'
+Plug 'Shougo/ddc-sorter_rank'
+Plug 'Shougo/ddc-ui-pum'
+Plug 'Shougo/pum.vim'
+call plug#end()
 
 "---------------------
 " view
@@ -140,80 +145,6 @@ nmap <F10> :sp %:h<CR>
 "---------------------------
 autocmd QuickFixCmdPost *vimgrep* cwindow
 
-"-----------------------------
-" neocomplete
-"-----------------------------
-"Note: This option must be set in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
-" Disable AutoComplPop.
-let g:acp_enableAtStartup = 0
-" Use neocomplete.
-let g:neocomplete#enable_at_startup = 1
-" Use smartcase.
-let g:neocomplete#enable_smart_case = 1
-" Set minimum syntax keyword length.
-let g:neocomplete#sources#syntax#min_keyword_length = 3
-
-" Define dictionary.
-let g:neocomplete#sources#dictionary#dictionaries = {
-    \ 'default' : '',
-    \ 'vimshell' : $HOME.'/.vimshell_hist',
-    \ 'scheme' : $HOME.'/.gosh_completions'
-        \ }
-
-" Define keyword.
-if !exists('g:neocomplete#keyword_patterns')
-    let g:neocomplete#keyword_patterns = {}
-endif
-let g:neocomplete#keyword_patterns['default'] = '\h\w*'
-
-" Plugin key-mappings.
-inoremap <expr><C-g>     neocomplete#undo_completion()
-inoremap <expr><C-l>     neocomplete#complete_common_string()
-
-" Recommended key-mappings.
-" <CR>: close popup and save indent.
-inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
-function! s:my_cr_function()
-  return (pumvisible() ? "\<C-y>" : "" ) . "\<CR>"
-  " For no inserting <CR> key.
-  "return pumvisible() ? "\<C-y>" : "\<CR>"
-endfunction
-" <TAB>: completion.
-inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-" <C-h>, <BS>: close popup and delete backword char.
-inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
-inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
-" Close popup by <Space>.
-"inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
-
-" AutoComplPop like behavior.
-"let g:neocomplete#enable_auto_select = 1
-
-" Shell like behavior(not recommended).
-"set completeopt+=longest
-"let g:neocomplete#enable_auto_select = 1
-"let g:neocomplete#disable_auto_complete = 1
-"inoremap <expr><TAB>  pumvisible() ? "\<Down>" : "\<C-x>\<C-u>"
-
-" Enable omni completion.
-autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-
-" Enable heavy omni completion.
-if !exists('g:neocomplete#sources#omni#input_patterns')
-  let g:neocomplete#sources#omni#input_patterns = {}
-endif
-"let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-"let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
-"let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
-
-" For perlomni.vim setting.
-" https://github.com/c9s/perlomni.vim
-let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
-
 "------------------------------------
 " unite.vim
 "------------------------------------
@@ -230,12 +161,12 @@ noremap <C-U><C-A> :Unite UniteWithBufferDir -buffer-name=files buffer file_mru 
 "------------------------------------
 nnoremap <silent> gr :<C-u>Rgrep<CR><C-R><C-W>
 nnoremap <silent> gl :<C-u>vimgrep /<C-R><C-W>/ %<CR>
-"
+
 "------------------------------------
 " Tagbar
 "------------------------------------
-nmap <F8> :let g:tagbar_left=1<CR> :TagbarToggle<CR> 
-nmap <F9> :let g:tagbar_left=0<CR> :TagbarToggle<CR>
+nmap <F8> :let g:tagbar_position='topleft vertical'<CR> :TagbarToggle<CR> 
+nmap <F9> :let g:tagbar_position='botright vertical'<CR> :TagbarToggle<CR>
 let g:tagbar_width = 46
 
 "---------------------
@@ -243,4 +174,32 @@ let g:tagbar_width = 46
 "---------------------
 filetype on
 filetype plugin indent on
+
+"------------------------------------
+" ddc
+"------------------------------------
+let g:denops#deno=expand('~/.deno/bin/deno')
+call ddc#custom#patch_global('sources', ['around'])
+call ddc#custom#patch_global('sourceOptions', {
+            \ '_': {
+            \   'matchers': ['matcher_head'],
+            \   'sorters': ['sorter_rank'],
+            \ },
+            \ 'around': {
+            \   'mark': 'A',
+            \   'minAutoCompleteLength': 1,
+            \ }
+            \ })
+call ddc#custom#patch_global(#{
+            \   ui: 'pum',
+            \   autoCompleteEvents: [
+            \     'InsertEnter', 'TextChangedI', 'TextChangedP',
+            \   ],
+            \ })
+call ddc#enable()
+
+inoremap <Tab> <Cmd>call pum#map#insert_relative(+1)<CR>
+inoremap <S-Tab> <Cmd>call pum#map#insert_relative(-1)<CR>
+inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
+
 
