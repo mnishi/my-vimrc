@@ -10,7 +10,6 @@ set incsearch
 set timeoutlen=2000
 filetype off
 filetype plugin indent off
-
 "---------------------------
 " dein
 "---------------------------
@@ -27,11 +26,10 @@ Plug 'preservim/tagbar'
 Plug 'thinca/vim-qfreplace'
 Plug 'vim-denops/denops.vim'
 Plug 'Shougo/ddc.vim'
+Plug 'Shougo/ddc-ui-native'
 Plug 'Shougo/ddc-around'
 Plug 'Shougo/ddc-matcher_head'
 Plug 'Shougo/ddc-sorter_rank'
-Plug 'Shougo/ddc-ui-pum'
-Plug 'Shougo/pum.vim'
 call plug#end()
 
 "---------------------
@@ -48,7 +46,7 @@ colorscheme molokai
 
 syntax on
 set t_Co=256
-set ts=4 sw=4 sts=4
+set ts=2 sw=2 sts=2
 set title
 set hlsearch
 
@@ -87,7 +85,7 @@ highlight Cursorline cterm=underline ctermfg=none ctermbg=none gui=underline gui
 "------------------------
 set ignorecase
 set smartcase
-set tabstop=4
+set tabstop=2
 set shiftwidth=4
 set expandtab
 set autoindent
@@ -123,7 +121,7 @@ set tags=./tags;
 "------------------------
 autocmd FileType python setl autoindent
 autocmd FileType python setl smartindent cinwords=if,elif,else,for,while,try,except,finally,def,class
-autocmd FileType python setl tabstop=8 expandtab shiftwidth=4 softtabstop=4
+autocmd FileType python setl tabstop=2 expandtab shiftwidth=2 softtabstop=2
 
 "------------------------
 " for ruby 
@@ -179,27 +177,32 @@ filetype plugin indent on
 " ddc
 "------------------------------------
 let g:denops#deno=expand('~/.deno/bin/deno')
+call ddc#custom#patch_global('ui', 'native')
 call ddc#custom#patch_global('sources', ['around'])
-call ddc#custom#patch_global('sourceOptions', {
-            \ '_': {
-            \   'matchers': ['matcher_head'],
-            \   'sorters': ['sorter_rank'],
-            \ },
-            \ 'around': {
-            \   'mark': 'A',
-            \   'minAutoCompleteLength': 1,
-            \ }
-            \ })
-call ddc#custom#patch_global(#{
-            \   ui: 'pum',
-            \   autoCompleteEvents: [
-            \     'InsertEnter', 'TextChangedI', 'TextChangedP',
-            \   ],
-            \ })
+call ddc#custom#patch_global('sourceOptions', #{
+      \   _: #{
+      \     matchers: ['matcher_head'],
+      \     sorters: ['sorter_rank']},
+      \   },
+      \ )
+call ddc#custom#patch_global('sourceOptions', #{
+      \   around: #{ mark: 'A' },
+      \ })
+call ddc#custom#patch_global('sourceParams', #{
+      \   around: #{ maxSize: 500 },
+      \ })
+call ddc#custom#patch_filetype(
+    \   ['c', 'cpp'], 'sources', ['around', 'clangd']
+    \ )
+call ddc#custom#patch_filetype(['c', 'cpp'], 'sourceOptions', #{
+    \   clangd: #{ mark: 'C' },
+    \ })
+call ddc#custom#patch_filetype('markdown', 'sourceParams', #{
+    \   around: #{ maxSize: 100 },
+    \ })
+inoremap <expr> <TAB>
+\ pumvisible() ? '<C-n>' :
+\ (col('.') <= 1 <Bar><Bar> getline('.')[col('.') - 2] =~# '\s') ?
+\ '<TAB>' : ddc#map#manual_complete()
+inoremap <expr> <S-TAB>  pumvisible() ? '<C-p>' : '<C-h>'
 call ddc#enable()
-
-inoremap <Tab> <Cmd>call pum#map#insert_relative(+1)<CR>
-inoremap <S-Tab> <Cmd>call pum#map#insert_relative(-1)<CR>
-inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
-
-
