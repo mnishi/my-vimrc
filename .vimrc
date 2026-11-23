@@ -5,32 +5,30 @@ set nocompatible
 set nobackup
 set mouse=
 set noswapfile
-set clipboard=unnamed,autoselect
+if has('clipboard')
+  set clipboard=unnamedplus
+endif
 set incsearch
 set timeoutlen=2000
-filetype off
-filetype plugin indent off
 "---------------------------
-" dein
+" vim-plug
 "---------------------------
-if &compatible
-    set nocompatible
+if !empty(globpath(&runtimepath, 'autoload/plug.vim', 1))
+  call plug#begin()
+  Plug 'vim-scripts/grep.vim'
+  Plug 'Shougo/unite.vim'
+  Plug 'Shougo/neomru.vim'
+  Plug 'tomasr/molokai'
+  Plug 'preservim/tagbar'
+  Plug 'thinca/vim-qfreplace'
+  Plug 'vim-denops/denops.vim'
+  Plug 'Shougo/ddc.vim'
+  Plug 'Shougo/ddc-ui-native'
+  Plug 'Shougo/ddc-around'
+  Plug 'Shougo/ddc-matcher_head'
+  Plug 'Shougo/ddc-sorter_rank'
+  call plug#end()
 endif
-
-call plug#begin()
-Plug 'vim-scripts/grep.vim'
-Plug 'Shougo/unite.vim'
-Plug 'Shougo/neomru.vim'
-Plug 'tomasr/molokai'
-Plug 'preservim/tagbar'
-Plug 'thinca/vim-qfreplace'
-Plug 'vim-denops/denops.vim'
-Plug 'Shougo/ddc.vim'
-Plug 'Shougo/ddc-ui-native'
-Plug 'Shougo/ddc-around'
-Plug 'Shougo/ddc-matcher_head'
-Plug 'Shougo/ddc-sorter_rank'
-call plug#end()
 
 "---------------------
 " view
@@ -39,13 +37,12 @@ set number
 set ruler
 set nowrap  
 
-set term=xterm-256color
-set ttytype=xterm-256color
 set background=dark
-colorscheme molokai
+if !empty(globpath(&runtimepath, 'colors/molokai.vim', 1))
+  colorscheme molokai
+endif
 
 syntax on
-set t_Co=256
 set ts=2 sw=2 sts=2
 set title
 set hlsearch
@@ -108,13 +105,15 @@ set fileformats=unix,dos,mac
 if has("unix")
 	set path+=/usr/include
 	set path+=/usr/local/include
-	set path+=./**/include
 endif
+set path+=./**/include
 
 "------------------------
 " tag file path
 "------------------------
 set tags=./tags;
+
+filetype plugin indent on
 
 "------------------------
 " for python 
@@ -167,16 +166,27 @@ nmap <F8> :let g:tagbar_position='topleft vertical'<CR> :TagbarToggle<CR>
 nmap <F9> :let g:tagbar_position='botright vertical'<CR> :TagbarToggle<CR>
 let g:tagbar_width = 46
 
-"---------------------
-" filetype 
-"---------------------
-filetype on
-filetype plugin indent on
-
 "------------------------------------
 " ddc
 "------------------------------------
-let g:denops#deno=expand('~/.deno/bin/deno')
+if !(has('nvim-0.10') || has('patch-9.1.0448'))
+      \ || empty(globpath(&runtimepath, 'autoload/ddc/custom.vim', 1))
+      \ || empty(globpath(&runtimepath, 'plugin/denops.vim', 1))
+  finish
+endif
+
+if !exists('g:denops#deno')
+  let s:deno = exepath('deno')
+  if empty(s:deno)
+    let s:deno = expand('~/.deno/bin/') . (has('win32') ? 'deno.exe' : 'deno')
+  endif
+  if !executable(s:deno)
+    finish
+  endif
+  let g:denops#deno = s:deno
+elseif !executable(g:denops#deno)
+  finish
+endif
 call ddc#custom#patch_global('ui', 'native')
 call ddc#custom#patch_global('sources', ['around'])
 call ddc#custom#patch_global('sourceOptions', #{
@@ -191,12 +201,12 @@ call ddc#custom#patch_global('sourceOptions', #{
 call ddc#custom#patch_global('sourceParams', #{
       \   around: #{ maxSize: 500 },
       \ })
-call ddc#custom#patch_filetype(
-    \   ['c', 'cpp'], 'sources', ['around', 'clangd']
-    \ )
-call ddc#custom#patch_filetype(['c', 'cpp'], 'sourceOptions', #{
-    \   clangd: #{ mark: 'C' },
-    \ })
+if !empty(globpath(&runtimepath, 'denops/ddc-sources/clangd.ts', 1))
+  call ddc#custom#patch_filetype(['c', 'cpp'], 'sources', ['around', 'clangd'])
+  call ddc#custom#patch_filetype(['c', 'cpp'], 'sourceOptions', #{
+        \   clangd: #{ mark: 'C' },
+        \ })
+endif
 call ddc#custom#patch_filetype('markdown', 'sourceParams', #{
     \   around: #{ maxSize: 100 },
     \ })
