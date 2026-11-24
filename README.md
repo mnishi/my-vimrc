@@ -5,22 +5,8 @@ For a fresh Neovim Qt setup, follow these steps in order. Keep a local copy of t
 1. [Install Neovim and Neovim Qt](#install-neovim-qt).
 2. [Install the Neovim configuration and plugins](#configure-neovim).
 3. [Install Universal Ctags](#install-universal-ctags) to use Tagbar.
-4. [Install the bundled font](#set-up-the-bundled-font).
-
-## Vim
-
-You can use the same `.vimrc` with Vim on Windows and Linux. Run `:echo expand('~')` in Vim to find your home directory.
-
-| Platform | Configuration file |
-| --- | --- |
-| Windows | `$HOME/_vimrc` |
-| Linux | `~/.vimrc` |
-
-To use plugins, install Git and [vim-plug](https://github.com/junegunn/vim-plug#installation), run `:PlugInstall` in Vim, then restart Vim.
-
-- ddc completion requires Vim 9.1.0448 or later and [Deno](https://deno.com/) 2.3.0 or later. Add Deno to your `PATH` and run `:echo exepath('deno')` in Vim to verify that Vim can find it.
-- Tagbar requires [Universal Ctags](#install-universal-ctags) on your `PATH`.
-- The `gr` search mapping requires `grep`. The `gl` mapping uses Vim's built-in `:vimgrep` and works on both platforms.
+4. [Install ripgrep](#install-ripgrep) for text search.
+5. [Install the bundled font](#set-up-the-bundled-font).
 
 ## Install Universal Ctags
 
@@ -111,9 +97,39 @@ Install vim-plug for Neovim. In PowerShell, run `nvim --clean`. On Linux, run `/
 Download [plug.vim](https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim) into that directory. Run `:echo stdpath('data') . '/site/autoload'` to get the full path.
 
 1. Run `:echo stdpath('config')` and create that directory if needed. The default is `%LOCALAPPDATA%\nvim` on Windows and `~/.config/nvim` on Linux.
-2. On a fresh setup, copy this repository's [.vimrc](.vimrc) into that directory as `init.vim`. If you already have an `init.vim` or `init.lua`, merge the settings into your existing configuration.
+2. On a fresh setup, copy this repository's [init.vim](init.vim) into that directory. If you already have an `init.vim` or `init.lua`, merge the settings into your existing configuration.
 3. Exit Neovim and launch `nvim-qt` on Windows or `/usr/local/bin/nvim-qt --nvim /usr/local/bin/nvim` on Linux. Run `:PlugInstall` and restart Neovim Qt when the installation finishes. This installs denops.vim and ddc along with the other plugins.
 4. Run `:checkhealth denops` to check Denops. If it cannot find Deno, check `:echo exepath('deno')` and launch Neovim Qt from a shell where `deno --version` works.
+
+### Telescope
+
+| Mapping | Action |
+| --- | --- |
+| `<leader>ff` | Find files in the working directory |
+| `<leader>fg` | Search file contents with ripgrep |
+| `<leader>fb` | Switch buffers |
+| `<leader>fh` | Search help tags |
+
+Use `:Telescope oldfiles` for recently opened files and `:Telescope registers` for registers.
+
+## Install ripgrep
+
+Telescope's `live_grep` and the `gr` mapping require [ripgrep](https://github.com/BurntSushi/ripgrep#installation) on your `PATH`.
+
+### Windows
+
+```powershell
+winget install --id BurntSushi.ripgrep.MSVC --exact
+```
+
+### Linux (Debian and Ubuntu)
+
+```sh
+sudo apt update
+sudo apt install ripgrep
+```
+
+Open a new terminal and run `rg --version`. Restart Neovim Qt and run `:echo exepath('rg')` to verify that it can find ripgrep.
 
 ## Set up the bundled font
 
@@ -129,4 +145,4 @@ This repository includes the Regular and Bold faces of [HackGen Console v2.10.0]
   fc-cache -f "$font_dir"
   ```
 
-Copy [ginit.vim](ginit.vim) into the directory shown by `:echo stdpath('config')` in Neovim. The default is `%LOCALAPPDATA%\nvim` on Windows and `~/.config/nvim` on Linux. If you already have a `ginit.vim`, merge the font setting into it. Restart Neovim Qt to use HackGen Console at 12 pt.
+Copy [ginit.vim](ginit.vim) into the directory shown by `:echo stdpath('config')` in Neovim. The default is `%LOCALAPPDATA%\nvim` on Windows and `~/.config/nvim` on Linux. If you already have a `ginit.vim`, merge the font setting into it. Restart Neovim Qt to use HackGen Console at 11 pt.

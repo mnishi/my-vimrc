@@ -3,24 +3,45 @@
 "---------------------
 set nocompatible
 set nobackup
-set mouse=
+set mouse=a
 set noswapfile
 if has('clipboard')
   set clipboard=unnamedplus
 endif
 set incsearch
 set timeoutlen=2000
+
+augroup CheckExternalChanges
+  autocmd!
+  autocmd FocusGained * checktime
+augroup END
+
+if has('win32')
+  if executable('pwsh.exe')
+    set shell=pwsh.exe
+    let &shellcmdflag='-NoLogo -Command "[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false);"'
+    set shellquote=
+    set shellxquote=
+  elseif executable('powershell.exe')
+    set shell=powershell.exe
+    let &shellcmdflag='-NoLogo -Command "[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false);"'
+    set shellquote=
+    set shellxquote=
+  endif
+endif
+
+let &shellpipe = '>%s 2>&1'
+
 "---------------------------
 " vim-plug
 "---------------------------
 if !empty(globpath(&runtimepath, 'autoload/plug.vim', 1))
   call plug#begin()
-  Plug 'vim-scripts/grep.vim'
-  Plug 'Shougo/unite.vim'
-  Plug 'Shougo/neomru.vim'
-  Plug 'tomasr/molokai'
+  Plug 'nvim-lua/plenary.nvim'
+  Plug 'nvim-telescope/telescope.nvim'
+  Plug 'nvim-treesitter/nvim-treesitter'
+  Plug 'loctvl842/monokai-pro.nvim'
   Plug 'preservim/tagbar'
-  Plug 'thinca/vim-qfreplace'
   Plug 'vim-denops/denops.vim'
   Plug 'Shougo/ddc.vim'
   Plug 'Shougo/ddc-ui-native'
@@ -38,8 +59,8 @@ set ruler
 set nowrap  
 
 set background=dark
-if !empty(globpath(&runtimepath, 'colors/molokai.vim', 1))
-  colorscheme molokai
+if !empty(globpath(&runtimepath, 'colors/monokai-pro.lua', 1))
+  colorscheme monokai-pro
 endif
 
 syntax on
@@ -52,6 +73,9 @@ set hlsearch
 "------------------------
 set showcmd
 set laststatus=2
+highlight StatusLine guifg=#FFFFFF guibg=#285CC4 gui=bold ctermfg=231 ctermbg=26 cterm=bold
+highlight StatusLineNC guifg=#FCFCFA guibg=#58535C gui=NONE ctermfg=255 ctermbg=240 cterm=NONE
+highlight WinSeparator guifg=#FFD866 guibg=NONE gui=NONE ctermfg=221 ctermbg=NONE cterm=NONE
 set statusline=[%n]											
 set statusline+=%m											
 set statusline+=%r											
@@ -76,6 +100,7 @@ setlocal cursorline
 autocmd WinEnter *.* setlocal cursorline
 autocmd WinLeave *.* setlocal nocursorline
 highlight Cursorline cterm=underline ctermfg=none ctermbg=none gui=underline guifg=NONE guibg=NONE
+highlight Visual ctermfg=white ctermbg=blue guifg=white guibg=blue
 
 "------------------------
 " editor
@@ -96,6 +121,7 @@ set wildmenu
 " encoding
 "------------------------
 set encoding=utf-8
+set makeencoding=utf-8
 set fileencodings=utf-8,iso-2022-jp,euc-jp,sjis
 set fileformats=unix,dos,mac
 
@@ -141,23 +167,25 @@ nmap <F10> :sp %:h<CR>
 " vimgrep
 "---------------------------
 autocmd QuickFixCmdPost *vimgrep* cwindow
-
-"------------------------------------
-" unite.vim
-"------------------------------------
-let g:unite_enable_start_insert=0
-noremap <C-U><C-B> :Unite buffer<CR>
-noremap <C-U><C-F> :UniteWithBufferDir -buffer-name=files file<CR>
-noremap <C-U><C-R> :Unite file_mru<CR>
-noremap <C-U><C-Y> :Unite -buffer-name=register register<CR>
-noremap <C-U><C-U> :Unite buffer file_mru<CR>
-noremap <C-U><C-A> :Unite UniteWithBufferDir -buffer-name=files buffer file_mru bookmark file<CR>
-
-"------------------------------------
-" grep.vim
-"------------------------------------
-nnoremap <silent> gr :<C-u>Rgrep<CR><C-R><C-W>
 nnoremap <silent> gl :<C-u>vimgrep /<C-R><C-W>/ %<CR>
+set grepprg=rg\ --vimgrep\ --no-heading\ --line-number\ --color\ never\ --glob=!tags\ --glob=!build/**
+set grepformat=%f:%l:%c:%m
+function! GrepWordInDir()
+  let l:default_word = expand('<cword>')
+  let l:word = input('Search word: ', l:default_word)
+  if empty(l:word)
+    echo "Canceled"
+    return
+  endif
+  let l:dir = input('Search in directory: ', getcwd(), 'dir')
+  if empty(l:dir)
+    echo "Canceled"
+    return
+  endif
+  execute 'grep! ' . shellescape(l:word) . ' ' . shellescape(l:dir)
+  copen
+endfunction
+nnoremap <silent> gr :call GrepWordInDir()<CR>
 
 "------------------------------------
 " Tagbar
@@ -216,3 +244,11 @@ inoremap <expr> <TAB>
 \ '<TAB>' : ddc#map#manual_complete()
 inoremap <expr> <S-TAB>  pumvisible() ? '<C-p>' : '<C-h>'
 call ddc#enable()
+
+"---------------------
+" telescope
+"---------------------
+nnoremap <leader>ff <cmd>Telescope find_files<cr>
+nnoremap <leader>fg <cmd>Telescope live_grep<cr>
+nnoremap <leader>fb <cmd>Telescope buffers<cr>
+nnoremap <leader>fh <cmd>Telescope help_tags<cr>
