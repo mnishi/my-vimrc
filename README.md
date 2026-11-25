@@ -122,6 +122,11 @@ Telescope's `live_grep` and the `gr` mapping require [ripgrep](https://github.co
 winget install --id BurntSushi.ripgrep.MSVC --exact
 ```
 
+> **Note**: On Windows, the `gr` mapping requires PowerShell Core (`pwsh`) to be installed. If `pwsh` is not installed, you can install it via winget:
+> ```powershell
+> winget install --id Microsoft.PowerShell --exact
+> ```
+
 ### Linux (Debian and Ubuntu)
 
 ```sh

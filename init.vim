@@ -22,11 +22,6 @@ if has('win32')
     let &shellcmdflag='-NoLogo -Command "[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false);"'
     set shellquote=
     set shellxquote=
-  elseif executable('powershell.exe')
-    set shell=powershell.exe
-    let &shellcmdflag='-NoLogo -Command "[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false);"'
-    set shellquote=
-    set shellxquote=
   endif
 endif
 
